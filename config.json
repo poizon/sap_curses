@@ -1,0 +1,8 @@
+{
+"server" : "db.example.com",
+"db"     : ["DB_1","DB_2"],
+"user"   : "sa",
+"pass"   : "password",
+"url"    : "http://www.cbr.ru/scripts/XML_daily.asp?date_req=",
+"valcode": ["USD","EUR","CHF"]
+}
