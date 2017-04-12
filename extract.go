@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
-  "regexp"
 	"time"
 )
 
@@ -41,15 +41,14 @@ type Result struct {
 func main() {
 	// попытка прочитать конфиг
 	configuration, _ := readConfig()
+	// готовим карту для хранения значений вида КОД_ВАЛЮТЫ => Курс на дату
 	curses := make(map[string]float64)
-
+	// получаем текущую дату и форматим ее
 	now_date := formatDate()
-
+	// читаем с сервера данные и парсим в структуру parsed
 	resp, err := http.Get(configuration.Url + now_date)
 	logError(err)
-
 	var parsed Result
-
 	defer resp.Body.Close()
 
 	decoder := xml.NewDecoder(resp.Body)
@@ -59,20 +58,20 @@ func main() {
 
 	// заполняем хэш значениями USD => 59.22
 	for _, value := range parsed.Valute {
-    // заменяем все , на .
-    re := regexp.MustCompile("(,{1})")
-    num := re.ReplaceAllString(value.Value, ".")
-    // конвертируем строку в число с плавающей точкой
-    dig, err := strconv.ParseFloat(num, 64)
-    // если ок - сохряняем в карту
+		// заменяем все , на .
+		re := regexp.MustCompile("(,{1})")
+		num := re.ReplaceAllString(value.Value, ".")
+		// конвертируем строку в число с плавающей точкой
+		dig, err := strconv.ParseFloat(num, 64)
+		// если ок - сохряняем в карту
 		if err == nil {
 			curses[value.CharCode] = dig
 		}
 
 	}
 
-//Теперь нужно сохранить значения валют в БД, которые прописаны в конфиге
-	 fmt.Printf("%v", curses["USD"])
+	//Теперь нужно сохранить значения валют в БД, которые прописаны в конфиге
+	fmt.Printf("%v", curses["USD"])
 }
 
 // логгер ошибок
@@ -129,7 +128,3 @@ func formatDate() string {
 	return format
 }
 
-// func checkCode(valute_code string, config_code []string) bool {
-//   fmt.Printf("%v",config_code)
-//   return true
-// }
