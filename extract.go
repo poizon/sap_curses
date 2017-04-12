@@ -1,9 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	_ "github.com/denisenkom/go-mssqldb"
 	"golang.org/x/net/html/charset"
 	"log"
 	"net/http"
@@ -11,8 +13,6 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-	"database/sql"
-  _ "github.com/denisenkom/go-mssqldb"
 )
 
 // импорт курсов в SAP
@@ -78,10 +78,10 @@ func main() {
 	for _, dbname := range configuration.Db {
 		dsn := "server=" + configuration.Server + ";user id=" + configuration.User + ";password=" + configuration.Pass + ";database=" + dbname
 		db, err := sql.Open("mssql", dsn)
-    logFatal(err)
-    // ping db test
+		logFatal(err)
+		// ping db test
 		err = db.Ping()
-    logFatal(err)
+		logFatal(err)
 
 		defer db.Close()
 
