@@ -150,6 +150,20 @@ func formatDate(format string, t time.Time) string {
 }
 
 func insertToDB(cur_date string, charcode string, curs float64, db *sql.DB) {
-	_, err := db.Query("INSERT INTO ORTT VALUES(?1,?2,?3,?4,?5)", cur_date, charcode, curs, "I", 13)
-	logError(err)
+	// проверка на существование значения
+	row := db.QueryRow("SELECT Rate FROM ORTT WHERE RateDate=?1 AND Currency=?2", cur_date, charcode)
+	var rate float64
+	err := row.Scan(&rate)
+
+	if rate > 0 {
+		fmt.Println("Already inserted")
+		return
+	} else if err != nil {
+		logError(err)
+	} else {
+		_, err := db.Query("INSERT INTO ORTT VALUES(?1,?2,?3,?4,?5)", cur_date, charcode, curs, "I", 13)
+		fmt.Printf("Inserted: %s , %s , %f\n", cur_date, charcode, curs)
+		logError(err)
+		return
+	}
 }
