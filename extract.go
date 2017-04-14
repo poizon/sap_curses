@@ -73,7 +73,6 @@ func main() {
 	}
 
 	// Теперь нужно сохранить значения валют во все БД, которые прописаны в конфиге
-	// Правильней делать конечно USE DB вместо полного реконнекта, но
 	// TODO: переделать чтобы можно было инсертить на разные сервера, а не в разные БД
 	for _, dbname := range configuration.Db {
 		dsn := "server=" + configuration.Server + ";user id=" + configuration.User + ";password=" + configuration.Pass + ";database=" + dbname
@@ -86,7 +85,7 @@ func main() {
 		defer db.Close()
 
 		for _, value := range configuration.ValCode {
-			getSQL(formatDate("sql", cur_time), value, curses[value])
+			insertToDB(formatDate("sql", cur_time), value, curses[value], db)
 		}
 
 	}
@@ -150,24 +149,7 @@ func formatDate(format string, t time.Time) string {
 	return format
 }
 
-// текущая дата для MSSQL, код валюты и значение курса
-// dsn := "server=" + *server + ";user id=" + *userid + ";password=" + *password + ";database=" + *database
-//   db, err := sql.Open("mssql", dsn)
-//   if err != nil {
-//     fmt.Println("Cannot connect: ", err.Error())
-//     return
-//   }
-//   err = db.Ping()
-//   if err != nil {
-//     fmt.Println("Cannot connect: ", err.Error())
-//     return
-//   }
-//   defer db.Close()
-func getSQL(cur_date string, charcode string, curs float64) {
-	// my $sql = qq(INSERT INTO ORTT VALUES('$sql_date',N'$key',$hash{$key},'I',13));
-	//db.Query("SELECT * FROM t WHERE a = ?3, b = ?2, c = ?1", "x", "y", "z")
-	fmt.Print("[ " + cur_date + "] ")
-	fmt.Print(charcode + " ")
-	fmt.Println(curs)
-	//return "INSERT INTO ORTT VALUES('" + cur_date + "', N'" + charcode + "','" + curs + "','I',13)
+func insertToDB(cur_date string, charcode string, curs float64, db *sql.DB) {
+	_, err := db.Query("INSERT INTO ORTT VALUES(?1,?2,?3,?4,?5)", cur_date, charcode, curs, "I", 13)
+	logError(err)
 }
